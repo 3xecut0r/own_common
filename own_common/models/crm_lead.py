@@ -23,7 +23,7 @@ class Lead(models.Model):
     x_solution_revenue_tax_amount = fields.Monetary(
         'Solution Tax', 'company_currency', compute='_x_compute_solution_revenue_tax_amount', store=True
     )
-    x_wht_solution = fields.Monetary('WHT Solution', compute='_x_compute_wht_solution', readonly=True, store=True)
+    x_wht_solution = fields.Monetary('WHT Solution', 'company_currency', compute='_x_compute_wht_solution', readonly=True, store=True)
 
     x_solution_cost = fields.Monetary('Solution Cost', 'company_currency')
     x_nrt_applicable = fields.Selection([('yes', 'Yes'), ('no', 'No')], 'Is NRT Applicable?', default='no')
