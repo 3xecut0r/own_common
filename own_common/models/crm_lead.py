@@ -85,14 +85,16 @@ class Lead(models.Model):
     )
     def _x_compute_wht(self):
         for lead_id in self:
+            solution_rate = abs(lead_id.x_wht_solution.amount if lead_id.x_wht_solution else 0)
+            service_rate = abs(lead_id.x_wht_service.amount if lead_id.x_wht_service else 0)
             lead_id.x_wht_solution_amount = (
-                lead_id.x_final_solution_revenue * (lead_id.x_wht_solution.amount / 100)
-                if lead_id.x_wht_solution.amount
+                lead_id.x_final_solution_revenue * (solution_rate / 100)
+                if solution_rate
                 else 0
             )
             lead_id.x_wht_service_amount = (
-                lead_id.x_final_service_revenue * (lead_id.x_wht_service.amount / 100)
-                if lead_id.x_wht_service.amount
+                lead_id.x_final_service_revenue * (service_rate / 100)
+                if service_rate
                 else 0
             )
 

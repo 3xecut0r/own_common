@@ -1,6 +1,6 @@
 {
     'name': 'Own_X',
-    'version': '17.0.1.0.6',
+    'version': '17.0.1.0.7',
     'summary': 'Summery',
     'description': 'Common Customization',
     'category': 'Category',

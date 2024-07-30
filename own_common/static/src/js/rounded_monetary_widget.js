@@ -29,8 +29,12 @@ export class RoundedMonetaryField extends MonetaryField {
             maximumFractionDigits: 0,
         }).format(roundedValue);
 
-        const currencySymbol = '$';
-        return `${currencySymbol} ${formattedNumber}`;
+        if (this.props.readonly) {
+            const currencySymbol = '$';
+            return `${currencySymbol} ${formattedNumber}`;
+        }
+
+        return formattedNumber;
     }
 
     get currencyId() {
