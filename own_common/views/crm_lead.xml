@@ -12,7 +12,7 @@
                             <!--    SOLUTION REVENUE    -->
                             <field name="x_solution_revenue"/>
                             <field name="x_solution_revenue_tax" string="Tax Type"/>
-                            <field name="x_solution_revenue_tax_amount" string="Tax"/>
+                            <field name="x_solution_revenue_tax_amount" string="Tax" options="{'currency_field': 'usd_currency_id'}"/>
                             <field name="x_final_solution_revenue" string="Total"/>
                             <field name="x_wht_solution" string="WHT"/>
                         </group>

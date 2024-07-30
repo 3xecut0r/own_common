@@ -54,25 +54,23 @@ class Lead(models.Model):
     )
 
     x_total_project_gp = fields.Monetary(
-        'Total Project GP', 'company_currency', compute='_x_compute_x_total_project_gp', store=True
+        'Total Project GP', 'company_currency', compute='_x_compute_total_project_gp', store=True
     )
     x_total_deal_value = fields.Monetary(
-        'Total Deal Value', 'company_currency', compute='_x_compute_x_total_deal_value', store=True
+        'Total Deal Value', 'company_currency', compute='_x_compute_total_deal_value', store=True
     )
-    x_gp = fields.Text('GP', compute='_x_compute_x_gp', store=True)
+    x_gp = fields.Text('GP', compute='_x_compute_gp', store=True)
     x_commission = fields.Float('Commission', compute='_x_compute_commission', store=True)
     x_commission_percentage = fields.Float('Commission %')
 
     @api.depends('x_solution_revenue', 'x_solution_revenue_tax', 'x_final_solution_revenue')
     def _compute_final_solution_revenue(self):
         for lead_id in self:
-            if lead_id.x_solution_revenue_tax.amount:
-                lead_id.x_final_solution_revenue = (
-                    lead_id.x_solution_revenue
-                    + (lead_id.x_solution_revenue * lead_id.x_solution_revenue_tax.amount / 100)
-                    if lead_id.x_solution_revenue and lead_id.x_solution_revenue_tax.amount
-                    else 0
-                )
+            lead_id.x_final_solution_revenue = (
+                lead_id.x_solution_revenue + (lead_id.x_solution_revenue * lead_id.x_solution_revenue_tax.amount / 100)
+                if lead_id.x_solution_revenue and lead_id.x_solution_revenue_tax.amount
+                else 0
+            )
 
     @api.depends(
         'x_solution_revenue_tax',
@@ -86,11 +84,9 @@ class Lead(models.Model):
         tax_mapping = {'gst': 5, 'sst': 4, 'srb': 4, 'pra': 4, 'kpra': 4}
 
         def get_rate(tax):
-            if tax and tax.name:
-                tax_name = tax.name.lower()
-                for key, value in tax_mapping.items():
-                    if key in tax_name:
-                        return value
+            for key, value in tax_mapping.items():
+                if tax.name and key in tax.name.lower():
+                    return value
             return 0
 
         for lead_id in self:
@@ -100,10 +96,11 @@ class Lead(models.Model):
     @api.depends('x_solution_cost', 'x_nrt_applicable')
     def _x_compute_nrt(self):
         for lead_id in self:
-            if lead_id.x_nrt_applicable.amount:
-                lead_id.x_nrt = lead_id.x_solution_cost * (
-                    (lead_id.x_nrt_applicable.amount / 100) if lead_id.x_nrt_applicable else 1
-                )
+            lead_id.x_nrt = (
+                (lead_id.x_solution_cost * ((lead_id.x_nrt_applicable.amount / 100) if lead_id.x_nrt_applicable else 1))
+                if lead_id.x_nrt_applicable.amount
+                else 0
+            )
 
     @api.depends(
         'x_solution_cost',
@@ -115,14 +112,17 @@ class Lead(models.Model):
     )
     def _x_compute_gp_on_license(self):
         for lead_id in self:
-            if lead_id.x_solution_revenue_tax.amount:
-                lead_id.x_gp_on_license = (
+            lead_id.x_gp_on_license = (
+                (
                     lead_id.x_final_solution_revenue
                     - lead_id.x_wht_solution
                     - (lead_id.x_solution_revenue * (lead_id.x_solution_revenue_tax.amount / 100))
                     - lead_id.x_solution_cost
                     - lead_id.x_nrt
                 )
+                if lead_id.x_solution_revenue_tax.amount
+                else 0
+            )
 
     @api.depends('x_final_service_revenue', 'x_service_revenue', 'x_service_revenue_tax')
     def _x_compute_final_service_revenue(self):
@@ -136,46 +136,64 @@ class Lead(models.Model):
     @api.depends('x_gp_on_services', 'x_final_service_revenue', 'x_service_revenue', 'x_wht_service')
     def _x_compute_gp_on_services(self):
         for lead_id in self:
-            if lead_id.x_service_revenue_tax.amount:
-                lead_id.x_gp_on_services = (
+            lead_id.x_gp_on_services = (
+                (
                     lead_id.x_final_service_revenue
                     - (lead_id.x_service_revenue * lead_id.x_service_revenue_tax.amount / 100)
                     - lead_id.x_wht_service
-                ) / 2
+                )
+                / 2
+                if lead_id.x_service_revenue_tax.amount
+                else 0
+            )
 
     @api.depends('x_solution_revenue_tax_amount', 'x_solution_revenue', 'x_solution_revenue_tax')
     def _x_compute_solution_revenue_tax_amount(self):
         for lead_id in self:
-            if lead_id.x_solution_revenue_tax.amount:
-                lead_id.x_solution_revenue_tax_amount = (
-                    lead_id.x_solution_revenue * lead_id.x_solution_revenue_tax.amount / 100
-                )
+            lead_id.x_solution_revenue_tax_amount = (
+                lead_id.x_solution_revenue * lead_id.x_solution_revenue_tax.amount / 100
+                if lead_id.x_solution_revenue_tax.amount
+                else 0
+            )
 
     @api.depends('x_service_revenue_tax_amount', 'x_service_revenue', 'x_service_revenue_tax')
     def _x_compute_service_revenue_tax_amount(self):
         for lead_id in self:
             lead_id.x_service_revenue_tax_amount = (
-                lead_id.x_service_revenue * lead_id.x_service_revenue_tax.amount / 100
-            ) if lead_id.x_service_revenue_tax.amount else 0
+                (lead_id.x_service_revenue * lead_id.x_service_revenue_tax.amount / 100)
+                if lead_id.x_service_revenue_tax.amount
+                else 0
+            )
 
     @api.depends('x_total_project_gp', 'x_gp_on_license', 'x_gp_on_services')
-    def _x_compute_x_total_project_gp(self):
+    def _x_compute_total_project_gp(self):
         for lead_id in self:
             lead_id.x_total_project_gp = lead_id.x_gp_on_license + lead_id.x_gp_on_services
 
     @api.depends('x_total_deal_value', 'x_solution_revenue', 'x_service_revenue')
-    def _x_compute_x_total_deal_value(self):
+    def _x_compute_total_deal_value(self):
         for lead_id in self:
             lead_id.x_total_deal_value = lead_id.x_solution_revenue + lead_id.x_service_revenue
 
-    @api.depends('x_gp', 'x_total_project_gp', 'x_total_deal_value')
-    def _x_compute_x_gp(self):
+    @api.depends(
+        'x_gp',
+        'x_total_project_gp',
+        'x_total_deal_value',
+        'expected_revenue',
+        'x_solution_revenue',
+        'x_service_revenue',
+        'x_solution_cost',
+    )
+    def _x_compute_gp(self):
         for lead_id in self:
-            if lead_id.x_total_deal_value != 0:
-                lead_id.x_gp = f'{round(100 * (lead_id.x_total_project_gp / lead_id.x_total_deal_value), 2)} %'
+            lead_id.x_gp = (
+                f'{round(100 * (lead_id.x_total_project_gp / lead_id.x_total_deal_value), 2)} %'
+                if lead_id.x_total_deal_value != 0
+                else 0
+            )
+            lead_id.expected_revenue = lead_id.x_solution_revenue + lead_id.x_service_revenue - lead_id.x_solution_cost
 
     @api.depends('x_commission', 'x_total_deal_value', 'x_commission_percentage')
     def _x_compute_commission(self):
         for lead_id in self:
-            # lead_id.x_commission = lead_id.x_total_project_gp * 0.1
             lead_id.x_commission = lead_id.x_total_project_gp * (lead_id.x_commission_percentage / 100)
