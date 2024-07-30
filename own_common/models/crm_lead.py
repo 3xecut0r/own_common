@@ -4,6 +4,9 @@ from odoo import api, fields, models
 class Lead(models.Model):
     _inherit = 'crm.lead'
 
+    x_base_currency_id = fields.Many2one(
+        'res.currency', 'Base Currency', compute='_x_compute_base_currency', store=True
+    )
     x_solution_revenue = fields.Monetary('Solution Revenue', 'company_currency')
     x_final_solution_revenue = fields.Monetary(
         'Final Solution Revenue',
@@ -27,7 +30,7 @@ class Lead(models.Model):
         'account.tax', string='NRT Type', domain=[('type_tax_use', '=', 'purchase')], default=None
     )
     # x_nrt = fields.Monetary('NRT', 'company_currency', compute='_x_compute_x_nrt', store=True)
-    x_nrt = fields.Float('NRT', compute='_x_compute_nrt', store=True)
+    x_nrt = fields.Monetary('NRT', 'company_currency', compute='_x_compute_nrt', store=True)
     x_gp_on_license = fields.Monetary(
         'GP On License', 'company_currency', compute='_x_compute_gp_on_license', store=True
     )
@@ -60,7 +63,7 @@ class Lead(models.Model):
         'Total Deal Value', 'company_currency', compute='_x_compute_total_deal_value', store=True
     )
     x_gp = fields.Text('GP', compute='_x_compute_gp', store=True)
-    x_commission = fields.Float('Commission', compute='_x_compute_commission', store=True)
+    x_commission = fields.Monetary('Commission', 'company_currency', compute='_x_compute_commission', store=True)
     x_commission_percentage = fields.Float('Commission %')
 
     @api.depends('x_solution_revenue', 'x_solution_revenue_tax', 'x_final_solution_revenue')
@@ -197,3 +200,8 @@ class Lead(models.Model):
     def _x_compute_commission(self):
         for lead_id in self:
             lead_id.x_commission = lead_id.x_total_project_gp * (lead_id.x_commission_percentage / 100)
+
+    @api.depends('partner_id', 'email_from', 'phone')
+    def _x_compute_base_currency(self):
+        for record in self:
+            record.x_base_currency_id = self.env.ref('base.USD')
