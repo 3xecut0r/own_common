@@ -5,15 +5,43 @@
         <field name="model">crm.lead</field>
         <field name="inherit_id" ref="crm.crm_lead_view_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//group[@name='opportunity_partner']" position="inside">
-                <field name="x_solution_revenue"/>
-                <field name="x_solution_revenue_tax" string="Tax"/>
-
-                <field name="x_solution_cost" string="Supplier Cost"/>
-                <field name="x_nrt_applicable"/>
-
-                <field name="x_service_revenue"/>
-                <field name="x_service_revenue_tax" string="Tax"/>
+            <xpath expr="//page[@name='lead']" position="after">
+                <page name="financials" string="Financials">
+                    <group>
+                        <group string="Solution">
+                            <!--    SOLUTION REVENUE    -->
+                            <field name="x_solution_revenue"/>
+                            <field name="x_solution_revenue_tax" string="Tax Type"/>
+                            <field name="x_solution_revenue_tax_amount" string="Tax"/>
+                            <field name="x_final_solution_revenue" string="Total"/>
+                            <field name="x_wht_solution" string="WHT"/>
+                        </group>
+                        <group string="Supplier">
+                            <!--    SOLUTION COST   -->
+                            <field name="x_solution_cost" string="Supplier Cost"/>
+                            <field name="x_nrt_applicable" string="Tax"/>
+                            <field name="x_nrt"/>
+                            <field name="x_gp_on_license"/>
+                        </group>
+                        <group string="Service">
+                            <!--    SERVICE REVENUE     -->
+                            <field name="x_service_revenue"/>
+                            <field name="x_service_revenue_tax" string="Tax Type"/>
+                            <field name="x_service_revenue_tax_amount" string="Tax"/>
+                            <field name="x_final_service_revenue" string="Total"/>
+                            <field name="x_wht_service" string="WHT Deduction"/>
+                            <field name="x_gp_on_services"/>
+                            <!--    TOTAL   -->
+                        </group>
+                        <group string="Total">
+                            <field name="x_commission_percentage"/>
+                            <field name="x_total_project_gp"/>
+                            <field name="x_total_deal_value"/>
+                            <field name="x_gp"/>
+                            <field  name="x_commission" string="Commission" widget="monetary"/>
+                        </group>
+                    </group>
+                </page>
             </xpath>
         </field>
     </record>
@@ -25,25 +53,25 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='contact_name']" position="before">
                 <!--    SOLUTION REVENUE    -->
-                <field name="x_solution_revenue"/>
-                <field name="x_solution_revenue_tax_amount" string="Tax"/>
-                <field name="x_final_solution_revenue" string="Total"/>
-                <field name="x_wht_solution" string="WHT"/>
+                <field name="x_solution_revenue" widget="integer"/>
+                <field name="x_solution_revenue_tax_amount" string="Tax" widget="integer" options="{'display_currency': True}"/>
+                <field name="x_final_solution_revenue" string="Total" widget="integer"/>
+                <field name="x_wht_solution" string="WHT" widget="integer"/>
                 <!--    SOLUTION COST   -->
-                <field name="x_solution_cost" string="Supplier Cost"/>
-                <field name="x_nrt"/>
-                <field name="x_gp_on_license"/>
+                <field name="x_solution_cost" string="Supplier Cost" widget="integer"/>
+                <field name="x_nrt" widget="integer"/>
+                <field name="x_gp_on_license" widget="integer"/>
                 <!--    SERVICE REVENUE     -->
-                <field name="x_service_revenue"/>
-                <field name="x_service_revenue_tax_amount" string="Tax"/>
-                <field name="x_final_service_revenue" string="Total"/>
-                <field name="x_wht_service" string="WHT Deduction"/>
-                <field name="x_gp_on_services"/>
+                <field name="x_service_revenue" widget="integer"/>
+                <field name="x_service_revenue_tax_amount" string="Tax" widget="integer"/>
+                <field name="x_final_service_revenue" string="Total" widget="integer"/>
+                <field name="x_wht_service" string="WHT Deduction" widget="integer"/>
+                <field name="x_gp_on_services" widget="integer"/>
                 <!--    TOTAL   -->
-                <field name="x_total_project_gp"/>
-                <field name="x_total_deal_value"/>
+                <field name="x_total_project_gp" widget="integer"/>
+                <field name="x_total_deal_value" widget="integer"/>
                 <field name="x_gp"/>
-                <field name="x_commission" optional="show"/>
+                <field name="x_commission" widget="integer"/>
             </xpath>
             <!--    HIDING DEFAULT FIELDS   -->
             <xpath expr="//field[@name='contact_name']" position="attributes">
