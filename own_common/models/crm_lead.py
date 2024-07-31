@@ -50,7 +50,7 @@ class Lead(models.Model):
     )
     x_wht_service = fields.Many2one('account.tax', string='WHT Service', domain=[('type_tax_use', '=', 'sale')])
     x_wht_service_amount = fields.Monetary(
-        'WHT Service', 'x_base_currency_id', compute='_x_compute_wht', readonly=True, store=True
+        'WHT Service Amount', 'x_base_currency_id', compute='_x_compute_wht', readonly=True, store=True
     )
     x_gp_on_services = fields.Monetary(
         'GP On Services', 'x_base_currency_id', compute='_x_compute_gp_on_services', store=True
