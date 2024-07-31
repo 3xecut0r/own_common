@@ -11,37 +11,37 @@
                         <field name="x_base_currency_id" invisible="1"/>
                         <group string="Solution">
                             <!--    SOLUTION REVENUE    -->
-                            <field name="x_solution_revenue" widget="rounded_monetary" options="{'currency_field': 'x_base_currency_id'}"/>
+                            <field name="x_solution_revenue" widget="rounded_monetary"/>
                             <field name="x_solution_revenue_tax" string="Tax Type"/>
-                            <field name="x_solution_revenue_tax_amount" string="Tax" widget="rounded_monetary" options="{'currency_field': 'x_base_currency_id'}"/>
-                            <field name="x_final_solution_revenue" string="Total" widget="rounded_monetary" options="{'currency_field': 'x_base_currency_id'}"/>
+                            <field name="x_solution_revenue_tax_amount" string="Tax" widget="rounded_monetary"/>
+                            <field name="x_final_solution_revenue" string="Total" widget="rounded_monetary"/>
                             <field name="x_wht_solution"/>
-                            <field name="x_wht_solution_amount" string="WHT" widget="rounded_monetary" options="{'currency_field': 'x_base_currency_id'}"/>
+                            <field name="x_wht_solution_amount" string="WHT" widget="rounded_monetary"/>
                         </group>
                         <group string="Supplier">
                             <!--    SOLUTION COST   -->
-                            <field name="x_solution_cost" string="Supplier Cost" widget="rounded_monetary" options="{'currency_field': 'x_base_currency_id'}"/>
+                            <field name="x_solution_cost" string="Supplier Cost" widget="rounded_monetary"/>
                             <field name="x_nrt_applicable" string="Tax"/>
-                            <field name="x_nrt" widget="rounded_monetary" options="{'currency_field': 'x_base_currency_id'}"/>
-                            <field name="x_gp_on_license" widget="rounded_monetary" options="{'currency_field': 'x_base_currency_id'}"/>
+                            <field name="x_nrt" widget="rounded_monetary"/>
+                            <field name="x_gp_on_license" widget="rounded_monetary"/>
                         </group>
                         <group string="Service">
                             <!--    SERVICE REVENUE     -->
-                            <field name="x_service_revenue" widget="rounded_monetary" options="{'currency_field': 'x_base_currency_id'}"/>
+                            <field name="x_service_revenue" widget="rounded_monetary"/>
                             <field name="x_service_revenue_tax" string="Tax Type"/>
-                            <field name="x_service_revenue_tax_amount" string="Tax" widget="rounded_monetary" options="{'currency_field': 'x_base_currency_id'}"/>
-                            <field name="x_final_service_revenue" string="Total" widget="rounded_monetary" options="{'currency_field': 'x_base_currency_id'}"/>
+                            <field name="x_service_revenue_tax_amount" string="Tax" widget="rounded_monetary"/>
+                            <field name="x_final_service_revenue" string="Total" widget="rounded_monetary"/>
                             <field name="x_wht_service" string="WHT Tax"/>
-                            <field name="x_wht_service_amount" string="WHT Deduction" widget="rounded_monetary" options="{'currency_field': 'x_base_currency_id'}"/>
-                            <field name="x_gp_on_services" widget="rounded_monetary" options="{'currency_field': 'x_base_currency_id'}"/>
+                            <field name="x_wht_service_amount" string="WHT Deduction" widget="rounded_monetary"/>
+                            <field name="x_gp_on_services" widget="rounded_monetary"/>
                             <!--    TOTAL   -->
                         </group>
                         <group string="Total">
                             <field name="x_commission_percentage"/>
-                            <field name="x_total_project_gp" widget="rounded_monetary" options="{'currency_field': 'x_base_currency_id'}"/>
-                            <field name="x_total_deal_value" widget="rounded_monetary" options="{'currency_field': 'x_base_currency_id'}"/>
+                            <field name="x_total_project_gp" widget="rounded_monetary"/>
+                            <field name="x_total_deal_value" widget="rounded_monetary"/>
                             <field name="x_gp"/>
-                            <field  name="x_commission" string="Commission" widget="rounded_monetary" options="{'currency_field': 'x_base_currency_id'}"/>
+                            <field  name="x_commission" string="Commission" widget="rounded_monetary"/>
                         </group>
                     </group>
                 </page>
@@ -57,6 +57,7 @@
             <xpath expr="//field[@name='contact_name']" position="before">
                 <!--    SOLUTION REVENUE    -->
                 <field name="x_solution_revenue" widget="rounded_monetary" sum="Solution Revenue"/>
+                <field name="x_base_currency_id" optional="hide"/>
                 <field name="x_solution_revenue_tax_amount" string="Tax" widget="rounded_monetary"/>
                 <field name="x_final_solution_revenue" string="Total" widget="rounded_monetary" sum="Total"/>
                 <field name="x_wht_service_amount" string="WHT" widget="rounded_monetary"/>

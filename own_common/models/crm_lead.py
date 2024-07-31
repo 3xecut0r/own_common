@@ -5,12 +5,12 @@ class Lead(models.Model):
     _inherit = 'crm.lead'
 
     x_base_currency_id = fields.Many2one(
-        'res.currency', 'Base Currency', compute='_x_compute_base_currency', store=True
+        'res.currency', 'Base Currency', compute='_x_compute_base_currency', compute_sudo=True
     )
-    x_solution_revenue = fields.Monetary('Solution Revenue', 'company_currency')
+    x_solution_revenue = fields.Monetary('Solution Revenue', 'x_base_currency_id')
     x_final_solution_revenue = fields.Monetary(
         'Final Solution Revenue',
-        'company_currency',
+        'x_base_currency_id',
         compute='_compute_final_solution_revenue',
         readonly=True,
         store=True,
@@ -19,51 +19,51 @@ class Lead(models.Model):
         'account.tax', string='Solution Revenue Tax', domain=[('type_tax_use', '=', 'sale')]
     )
     x_solution_revenue_tax_amount = fields.Monetary(
-        'Solution Tax', 'company_currency', compute='_x_compute_solution_revenue_tax_amount', store=True
+        'Solution Tax', 'x_base_currency_id', compute='_x_compute_solution_revenue_tax_amount', store=True
     )
     x_wht_solution = fields.Many2one('account.tax', string='WHT Tax', domain=[('type_tax_use', '=', 'sale')])
-    x_wht_solution_amount = fields.Monetary('WHT Solution', 'company_currency', compute='_x_compute_wht', store=True)
+    x_wht_solution_amount = fields.Monetary('WHT Solution', 'x_base_currency_id', compute='_x_compute_wht', store=True)
 
-    x_solution_cost = fields.Monetary('Solution Cost', 'company_currency')
+    x_solution_cost = fields.Monetary('Solution Cost', 'x_base_currency_id')
     x_nrt_applicable = fields.Many2one(
         'account.tax', string='NRT Type', domain=[('type_tax_use', '=', 'purchase')], default=None
     )
-    # x_nrt = fields.Monetary('NRT', 'company_currency', compute='_x_compute_x_nrt', store=True)
-    x_nrt = fields.Monetary('NRT', 'company_currency', compute='_x_compute_nrt', store=True)
+    # x_nrt = fields.Monetary('NRT', 'x_base_currency_id', compute='_x_compute_x_nrt', store=True)
+    x_nrt = fields.Monetary('NRT', 'x_base_currency_id', compute='_x_compute_nrt', store=True)
     x_gp_on_license = fields.Monetary(
-        'GP On License', 'company_currency', compute='_x_compute_gp_on_license', store=True
+        'GP On License', 'x_base_currency_id', compute='_x_compute_gp_on_license', store=True
     )
 
-    x_service_revenue = fields.Monetary('Service Revenue', 'company_currency')
+    x_service_revenue = fields.Monetary('Service Revenue', 'x_base_currency_id')
     x_service_revenue_tax = fields.Many2one(
         'account.tax', string='Service Revenue Tax', domain=[('type_tax_use', '=', 'sale')]
     )
     x_service_revenue_tax_amount = fields.Monetary(
-        'Service Tax', 'company_currency', compute='_x_compute_service_revenue_tax_amount', store=True
+        'Service Tax', 'x_base_currency_id', compute='_x_compute_service_revenue_tax_amount', store=True
     )
     x_final_service_revenue = fields.Monetary(
         'Final Service Revenue',
-        'company_currency',
+        'x_base_currency_id',
         compute='_x_compute_final_service_revenue',
         readonly=True,
         store=True,
     )
     x_wht_service = fields.Many2one('account.tax', string='WHT Service', domain=[('type_tax_use', '=', 'sale')])
     x_wht_service_amount = fields.Monetary(
-        'WHT Service', 'company_currency', compute='_x_compute_wht', readonly=True, store=True
+        'WHT Service', 'x_base_currency_id', compute='_x_compute_wht', readonly=True, store=True
     )
     x_gp_on_services = fields.Monetary(
-        'GP On Services', 'company_currency', compute='_x_compute_gp_on_services', store=True
+        'GP On Services', 'x_base_currency_id', compute='_x_compute_gp_on_services', store=True
     )
 
     x_total_project_gp = fields.Monetary(
-        'Total Project GP', 'company_currency', compute='_x_compute_total_project_gp', store=True
+        'Total Project GP', 'x_base_currency_id', compute='_x_compute_total_project_gp', store=True
     )
     x_total_deal_value = fields.Monetary(
-        'Total Deal Value', 'company_currency', compute='_x_compute_total_deal_value', store=True
+        'Total Deal Value', 'x_base_currency_id', compute='_x_compute_total_deal_value', store=True
     )
     x_gp = fields.Text('GP', compute='_x_compute_gp', store=True)
-    x_commission = fields.Monetary('Commission', 'company_currency', compute='_x_compute_commission', store=True)
+    x_commission = fields.Monetary('Commission', 'x_base_currency_id', compute='_x_compute_commission', store=True)
     x_commission_percentage = fields.Float('Commission %')
 
     @api.depends('x_solution_revenue', 'x_solution_revenue_tax', 'x_final_solution_revenue')
@@ -88,15 +88,9 @@ class Lead(models.Model):
             solution_rate = abs(lead_id.x_wht_solution.amount if lead_id.x_wht_solution else 0)
             service_rate = abs(lead_id.x_wht_service.amount if lead_id.x_wht_service else 0)
             lead_id.x_wht_solution_amount = (
-                lead_id.x_final_solution_revenue * (solution_rate / 100)
-                if solution_rate
-                else 0
+                lead_id.x_final_solution_revenue * (solution_rate / 100) if solution_rate else 0
             )
-            lead_id.x_wht_service_amount = (
-                lead_id.x_final_service_revenue * (service_rate / 100)
-                if service_rate
-                else 0
-            )
+            lead_id.x_wht_service_amount = lead_id.x_final_service_revenue * (service_rate / 100) if service_rate else 0
 
     @api.depends('x_solution_cost', 'x_nrt_applicable')
     def _x_compute_nrt(self):
@@ -197,7 +191,14 @@ class Lead(models.Model):
         for lead_id in self:
             lead_id.x_commission = lead_id.x_total_project_gp * (lead_id.x_commission_percentage / 100)
 
-    @api.depends('partner_id', 'email_from', 'phone')
+    @api.depends('partner_id', 'email_from', 'phone', 'company_id')
     def _x_compute_base_currency(self):
         for record in self:
             record.x_base_currency_id = self.env.ref('base.USD')
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        res = super().create(vals_list)
+        for lead_id in self:
+            lead_id.x_base_currency_id = self.env.ref('base.USD')
+        return res
